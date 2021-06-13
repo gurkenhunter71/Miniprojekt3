@@ -12,3 +12,6 @@ Features: Client:
 Server: Passwords are hashed.
 Available in English and German. Due dates are supported.
 
+not everything is working but i hope you will consider that i worked alone.
+Kind regards
+Dario
