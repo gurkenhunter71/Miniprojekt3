@@ -13,37 +13,45 @@ public class User implements Serializable  {
 	
 	
 	private static final long serialVersionUID = 1;
+	private static int highestID = 0;
 	private static Logger logger = Logger.getLogger("");
 	private String password;
 	private ArrayList<Integer>  toDoList;
 	private static final SecureRandom rand = new SecureRandom();
 	private final String username;
 	private static final int iterations = 127;
+	private String userToken;
 	
 	private static final ArrayList<User> Users = new ArrayList<User>();
 	
 	private final byte[] salt = new byte[64];
 	private String hashedPassword;
+	private int userID;
 	
-	public User(String username, String password) {
+	public User(String username, String password, String userToken) {
 		this.username = username;
-		
+		this.userID = getNextID();
 		
 		this.hashedPassword = hash(password);
 		this.toDoList = new ArrayList<Integer>();
 		
+		this.userToken = userToken;
+		
 	}
-	
-	//return existing user
+
 	public static User exists(String username) {
 		synchronized (Users) {
 			for (User User : Users) {
-				if (User.username.equals(username)) return User;
+				if (User.username.equals(username))
+					return User;
 			}
 		}
 		return null;
 	}
 
+	private static int getNextID() {
+		return highestID++;
+	}
 	public String getUsername() {
 		return username;
 	}
@@ -88,11 +96,23 @@ public class User implements Serializable  {
 		this.hashedPassword = hash(newPassword);
 	}
 
-	public static String getToken() {
-		byte[] token = new byte[16];
-		rand.nextBytes(token);
-		return bytesToHex(token);
+	public String getToken() {
+		return userToken;
 	
+	}
+	public String getUserToken() {
+		return userToken;
+	}
+
+	public void setUserToken() {
+		this.userToken= User.createToken();
+	}
+	public int getUserID() {
+		return userID;
+	}
+
+	public void setID(int userID) {
+		this.userID = userID;
 	}
 	
 	//hashing
@@ -112,14 +132,20 @@ public class User implements Serializable  {
 	
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
-	public static String bytesToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 2];
-		for (int j = 0; j < bytes.length; j++) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = hexArray[v >>> 4];
-			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+	public static String createToken() {
+		String token = "";
+		char[] characters = new char[36];
+		// fill array with letters (A-Z) and numbers (0-9)
+		for (int i = 0; i < 36; i++) {
+			characters[i] = (char) ('A' + i);
+			if (i > 25)
+				characters[i] = (char) ('0' + (i - 26));
 		}
-		return new String(hexChars);
-	
+		// create a random string of letters and numbers
+		for (int i = 0; i < 30; i++) {
+			int randomInt = (int) (Math.random() * 35 - 0.5) + 1;
+			token += characters[randomInt];
+		}
+		return token;
 	}
 }

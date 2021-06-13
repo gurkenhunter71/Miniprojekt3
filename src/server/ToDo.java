@@ -1,18 +1,24 @@
 package server;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+
 
 import server.Prio;
 
-public class ToDo implements Comparable <ToDo> {
+public class ToDo implements Comparable <ToDo>, Serializable, Sendable {
 	
+	protected static ArrayList<ToDo> toDolistServer = new ArrayList<ToDo>();
+
 	private static int IDNr = 0;
-	private final int ID;
+	private int ID;
 	private String title;
 	private Prio Prio;
 	private String description;
 	private LocalDate dueDate; 
-
+	private String user;
+	private static final long serialVersionUID = 0;
 	
 
 	private static int raiseID() {
@@ -21,15 +27,26 @@ public class ToDo implements Comparable <ToDo> {
 	
 	@Override
 	public String toString() {
-		return title + " Deadline: " + dueDate;
+		return ID + "  :  " + title + "  :  " + dueDate+ "  :  " + user ;
 	}
 
-	public ToDo(String title, Prio Prio, String description, LocalDate dueDate) {
+	public ToDo(String title, Prio Prio, String description, LocalDate dueDate, String user) {
 		this.ID = raiseID();
 		this.title = title;
 		this.Prio = Prio;
 		this.description = description;
 		this.dueDate = dueDate;
+		this.user = user;
+	}
+	
+	public ToDo(String title, Prio Prio, String description, String user) {
+		this.ID = raiseID();
+		this.title = title;
+		this.Prio = Prio;
+		this.description = description;
+		this.dueDate = null;
+		this.user = user;
+		
 	}
 	
 	public ToDo(String title, Prio Prio, String description) {
@@ -38,6 +55,17 @@ public class ToDo implements Comparable <ToDo> {
 		this.Prio = Prio;
 		this.description = description;
 		this.dueDate = null;
+		
+		
+	}
+	public ToDo(String title, Prio Prio, String description, LocalDate dueDate) {
+		this.ID = raiseID();
+		this.title = title;
+		this.Prio = Prio;
+		this.description = description;
+		this.dueDate = dueDate;
+		
+		
 		
 	}
 
@@ -84,8 +112,37 @@ public class ToDo implements Comparable <ToDo> {
 	public int getID() {
 		return ID;
 	}
-	
-	
+	public String getUser() {
+		return this.user;
+	}
+	public void setUser(String user) {
+		this.user=user;
+	}
+
+	public void setID(int toDoID) {
+		this.ID = toDoID;
+		// Correct highest ID if IDs are restored from files (may have gaps after
+		// deleting entries)
+		if (this.ID > highestID)
+			highestID = toDoID + 1;
+	}
+	private static int getNextID() {
+		return highestID++;
+	}
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void send(Message msg) {
+		// TODO Auto-generated method stub
+		
+	}
+	public static ArrayList<ToDo> getTodolistserver() {
+		return toDolistServer;
+	}
 	@Override
 	public int compareTo(ToDo o) {
 		int compValue = this.getTitle().compareTo(o.getTitle());
@@ -98,6 +155,7 @@ public class ToDo implements Comparable <ToDo> {
 					return 1;
 	}
 	
+	
 	public boolean equals(ToDo o) {
 		if(this.ID == o.getID()) 
 			return true;
@@ -105,4 +163,11 @@ public class ToDo implements Comparable <ToDo> {
 			return false;
 	}
 
+	@Override
+	public void send(client.commons.Message msg) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
+

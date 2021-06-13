@@ -24,15 +24,21 @@ public class Result extends Message {
 	 * When a list is requested, the result includes all list values
 	 */
 	public Result(boolean result, ArrayList<String> list) {
-		super(new String[] {"Result",Boolean.toString(result)}, list);		
+		super(new String[] {"Result",Boolean.toString(result), list});		
 	}
 	
+	
+
 	/**
 	 * This message type does no processing at all
 	 */
 	@Override
 	public void process(Client client) {
 	}
+	public Result(boolean result, int ID) {
+		super(new String[] {"Result", Boolean.toString(result), Integer.toString(ID)});		
+	}
 	
+    
 
 }

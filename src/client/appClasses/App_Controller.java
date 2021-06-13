@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 import server.Prio;
+import server.ServerModel;
 import server.ToDo;
+import server.User;
+import server.Client;
 import client.JavaFX_App_Template;
 import client.ServiceLocator;
 import client.abstractClasses.Controller;
@@ -41,7 +44,13 @@ public class App_Controller extends Controller<App_Model, App_View> {
 			String ipAddress = view.ipAddressTF.getText();
 			int port = Integer.parseInt(view.portTF.getText());
 			model.connect(ipAddress, port);
+			
+			//file
+			model.readSaveFileUser();
+			
 			view.backToLogin();
+			
+			
 			try {
 				model.connectionControl();
 			} catch (IOException e) {
@@ -57,8 +66,12 @@ public class App_Controller extends Controller<App_Model, App_View> {
 				// Parameters of any PropertyChangeListener
 				(observable, oldValue, newValue) -> validateipAdress(newValue));
 	
+        view.usernameTF.textProperty().addListener(
+				// Parameters of any PropertyChangeListener
+				(observable, oldValue, newValue) -> validateEmailAddress(newValue));
+        
         view.portTF.textProperty().addListener((observable, oldValue, newValue) -> validatePort(newValue));
-        view.usernameTFLogin.textProperty().addListener((observable, oldValue, newValue) -> validateUserName(newValue));
+        view.usernameTFLogin.textProperty().addListener((observable, oldValue, newValue) -> validateEmailAddress(newValue));
         // register ourselves to handle window-closing event
         view.getStage().setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -89,6 +102,7 @@ public class App_Controller extends Controller<App_Model, App_View> {
 		view.backButton.setOnAction(this::backToLogin);
 		
 		view.backBtn2.setOnAction(this::changetodoBp);
+		view.backButtonToDo.setOnAction(this::changetodoBp);
 
 		view.saveBtn.setOnAction(arg0 -> {
 			try {
@@ -101,6 +115,7 @@ public class App_Controller extends Controller<App_Model, App_View> {
 		
 		view.todoList.setOnMouseClicked(this::showToDo);
 		
+		view.backRootButton.setOnAction(this::backToRoot);
 		
 		view.deleteBtn.setOnAction(this::deleteToDo);
 		
@@ -131,6 +146,12 @@ public class App_Controller extends Controller<App_Model, App_View> {
 	
 	private void logOut(Event e) throws IOException {
 		model.logOut();
+		//files
+		model.writeSaveFileToDo();
+		
+		
+		
+		
 		view.backToLogin();
 	}
 	private void loginClient(Event e) throws IOException {
@@ -138,7 +159,16 @@ public class App_Controller extends Controller<App_Model, App_View> {
 		String password = view.pwTFLogin.getText();
 		Boolean passwordCheck = model.login(userName, password);
 		if (passwordCheck == true) {
+			model.writeSaveFileUsers();
+			//read files
+			model.readSaveFileToDo();
 		view.changetodoBp();
+		
+		
+		
+		updateAllLists();
+		
+		
 		} else {
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setHeaderText("Wrong password");
@@ -151,6 +181,7 @@ public class App_Controller extends Controller<App_Model, App_View> {
 	
 	private void showToDo(MouseEvent mouseevent1) {
 		view.changeViewCreateToDOs();
+		
 		// disable
 		ToDo toDo = (ToDo) view.todoList.getSelectionModel().getSelectedItem();
 		this.updateView(toDo);
@@ -174,9 +205,15 @@ public class App_Controller extends Controller<App_Model, App_View> {
 		
 		
 		
-		for(server.ToDo t : model.myTreeToDoList) {
+		for(ToDo t : model.myTreeToDoList) {
 			view.todoList.getItems().add(t);
 		}
+		
+		
+		for(ToDo t : model.getToDoList()) {
+			view.todoList.getItems().add(t);
+		}
+		
 		
 		
 	}
@@ -191,6 +228,8 @@ public class App_Controller extends Controller<App_Model, App_View> {
 			//view.idTF.setText(String.valueOf(i));
 			view.idTF.setText(String.valueOf(toDo.getID()));
 			
+			//view.usernameTFTODO.setText(String.valueOf(toDo.getUser()));
+			//view.usernameTFTODO.setText(String.valueOf(model.to);
 			
 			
 		} else {
@@ -208,27 +247,59 @@ public class App_Controller extends Controller<App_Model, App_View> {
 
 	private void saveNewToDo(Event e) throws IOException {
 		String titel = view.txtTitle.getText();
-		Prio Prio = view.prioCB.getSelectionModel().getSelectedItem();
+		Prio priority = view.prioCB.getSelectionModel().getSelectedItem();
 		String description = view.txtaDescription.getText();
 		LocalDate dueDate = view.dueDP.getValue();
+		int ID;
+		String username;
 		
+		//ToDo todo = new ToDo(titel, priority, description, dueDate, username);
+		//model.myTreeToDoList.add(todo);
+		username = model.createToDo(titel, priority, description, dueDate);
 		
-		
-		model.myTreeToDoList.add(new ToDo(titel, Prio, description, dueDate));
-		System.out.println(dueDate);
+		//this is done in msg part
+		//model.myTreeToDoList.add(new ToDo(titel, Prio, description, dueDate));
+		//System.out.println(dueDate);
+		System.out.println("Received: Result|true");
 		
 	
 	
 		view.todoList.getItems().clear();
+		//ID = model.createToDo(titel, priority, description, dueDate);
+		/*for(ToDo t : ServerModel.getToDoList()) {
+			//updateAllLists();
+			/*if(t.getName().equals(view.usernameTFTODO.getText())){
+				view.todoList.getItems().add(t);
+			}*/
+		//	view.todoList.getItems().add(t);
+	//	}
+	
+		//ToDo todo = new ToDo(titel, priority, description, dueDate, username);
+		model.myTreeToDoList.add(new ToDo(titel, priority, description, dueDate, username));
 		for(ToDo t : model.myTreeToDoList) {
-			view.todoList.getItems().add(t);
+			//if (ID == t.getID()) {
+			updateAllLists();
 		}
+			/*
+		if (client.getToken().equals(token)) {
+			if(title.length()>= 1) {
+				if(localDate.compareTo(today) >= 0) {
+					String username = client.getName();
+					ToDo toDo = new ToDo(this.title, p, this.description,localDate, username);
+					//add it to the list
+					ServerModel.getToDoList().add(toDo);
+					result = true;
+				}
+				
+		}*/
+		
 		
 		
 	
 		view.changeMainView();
-		
-	}
+		}
+
+	
 	
 	//Methoden für Eingabeprüfung
 	
@@ -283,18 +354,21 @@ public class App_Controller extends Controller<App_Model, App_View> {
 	private boolean isValidPort(String i) {
 		int x = Integer.parseInt(i);
 		
-		if (x >= 1 && x <= 100000) {
+		if (x > 50000 && x <= 100000) {
 			return true;
 		}else {
 			return false;
 		}
 	}
 	
-	private void validateUserName(String newValue) {
+	/*private void validateUserName(String newValue) {
 		boolean valid = false;
 		
 		view.usernameTFLogin.getStyleClass().remove("UserNameNotOk");
 		view.usernameTFLogin.getStyleClass().remove("UserNameOk");
+		
+		view.usernameTF.getStyleClass().remove("UserNameNotOk");
+		view.usernameTF.getStyleClass().remove("UserNameOk");
 		
 		if (isValidName(newValue)) {
 			valid = true;
@@ -307,12 +381,66 @@ public class App_Controller extends Controller<App_Model, App_View> {
 		} else {
 			view.usernameTFLogin.getStyleClass().add("UserNameNotOk");
 		}
+		
+		if (valid) {
+			view.usernameTF.getStyleClass().add("UserNameOk");
+		} else {
+			view.usernameTF.getStyleClass().add("UserNameNotOk");
+		}
 	}
 	    
 	 public boolean isValidName(String s){      
-	     String regex="\"[a-zA-Z0-9\\\\._\\\\-]{3,}\"";      
+	     String regex="^[a-z0-9_-]{5,15}$";      
 	      return s.matches(regex);//returns true if input and regex matches otherwise false;
 	 }
+	 */
+	
+	private void validateEmailAddress(String newValue) {
+		boolean valid = false;
+
+		// Split on '@': must give us two not-empty parts
+		String[] addressParts = newValue.split("@");
+		if (addressParts.length == 2 && !addressParts[0].isEmpty() && !addressParts[1].isEmpty()) {
+			// We want to split the domain on '.', but split does not give us an empty
+			// string, if the split-character is the last character in the string. So we
+			// first ensure that the string does not end with '.'
+			if (addressParts[1].charAt(addressParts[1].length() - 1) != '.') {
+				// Split domain on '.': must give us at least two parts.
+				// Each part must be at least two characters long
+				String[] domainParts = addressParts[1].split("\\.");
+				if (domainParts.length >= 2) {
+					valid = true;
+					for (String s : domainParts) {
+						if (s.length() < 2) valid = false;
+					}
+				}
+			}
+		}
+
+		view.usernameTF.getStyleClass().remove("emailNotOk");
+		view.usernameTF.getStyleClass().remove("emailOk");
+		if (valid) {
+			view.usernameTF.getStyleClass().add("emailOk");
+			view.createUserButton.setDisable(false);
+		} else {
+			view.usernameTF.getStyleClass().add("emailNotOk");
+			view.createUserButton.setDisable(true);
+		}
+		
+		view.usernameTFLogin.getStyleClass().remove("emailNotOk");
+		view.usernameTFLogin.getStyleClass().remove("emailOk");
+		if (valid) {
+			view.usernameTFLogin.getStyleClass().add("emailOk");
+		} else {
+			view.usernameTFLogin.getStyleClass().add("emailNotOk");
+		}
+	}
+
+	
+
+	private void backToRoot(Event e) {
+		view.backToRoot();
+	}
 	
 	private void changeViewRegistration (Event e) {
 		view.changeViewRegistration();
@@ -337,9 +465,10 @@ public class App_Controller extends Controller<App_Model, App_View> {
 		String name = view.usernameTF.getText();
 		String password = view.pwTF.getText();
 		if(password != null && password.length()>= 3) {
-			if (name != null && name.length() >= 3) {
-			Boolean login = model.createUser(name, password);
-			view.chageViewLogin();
+			if (name != null && App_Model.checkEmail(name)) {
+			model.createUser(name, password);
+			
+			view.changeViewLogin();
 			}
 		} else {
 			Alert errorAlert = new Alert(AlertType.ERROR);

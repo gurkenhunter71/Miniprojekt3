@@ -1,6 +1,7 @@
 package client.commons;
 
 import server.Client;
+import client.appClasses.*;
 
 public class Logout extends Message{
 
@@ -12,6 +13,7 @@ public class Logout extends Message{
 	public void process(Client client) {
 		client.setToken(null); // Destroy authentication token
 		client.setUser(null); // Destroy User information
+		
 		client.send(new Result(true));
 	}
 		

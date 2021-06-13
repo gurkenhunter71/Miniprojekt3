@@ -2,6 +2,8 @@ package client.commons;
 
 import server.User;
 import server.Client;
+import server.ServerModel;
+import client.appClasses.*;
 
 public class Login extends Message{
 
@@ -18,16 +20,24 @@ public class Login extends Message{
 	@Override
 	public void process(Client client) {
 		Message reply;
+		
 		// Find existing login matching the username
-		User User = User.exists(username);
-		if (User != null && User.checkPassword(password)) { //Password mit Hash funktioniert nicht 
-			String token = User.getToken();
+		User user = User.exists(username);
+		if (user != null && user.checkPassword(password)) { //Password mit Hash funktioniert nicht 
+			if(user.getToken() == null) {
+				user.setUserToken();}
+			
+			
+			String token = user.getToken();
+			client.setUser(user);
 			client.setToken(token);
+			
 			reply = new Result(true, token);
 		} else {
 			reply = new Result(false);
 		}
 		client.send(reply);
 		
-	}
-}
+	
+	}}
+	

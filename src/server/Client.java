@@ -8,12 +8,14 @@ import java.util.logging.Logger;
 
 import client.commons.Message;
 import client.commons.Result;
+import toDoServer.ServerModel;
 
 public class Client implements Sendable {
 	private Socket socket;
 	private String name;
 	User User = null;
 	private boolean clientReachable = true;
+	private ServerModel serverModel;
 	private Instant lastUsage;
 	private String token = null;
 	private static Logger logger = Logger.getLogger("");
@@ -22,16 +24,27 @@ public class Client implements Sendable {
 	 * Create a new client object, communicating over the given socket. Immediately
 	 * start a thread to receive messages from the client.
 	 */
+	
+	// ID
+		private static int clientCounter = 0;
+		private int clientID;
+	
 	public Client(Socket socket) {
 		this.socket = socket;
+		
 		this.setLastUsage(Instant.now());
+		
+		this.clientID = clientCounter;
+		clientCounter++;
 
 		// thread
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
+				System.out.println("The " + getClientIDAsText() + " has connected" );
+				
 				try {
-					while (clientReachable) {
+					while (Client.this.socket != null) {
 						Message msg = Message.receive(socket);
 
 						
@@ -86,7 +99,6 @@ public class Client implements Sendable {
 		}
 	}
 
-	@Override
 	public String getName() {
 		String name = null;
 		if (User != null) name = User.getUsername();
@@ -124,6 +136,9 @@ public class Client implements Sendable {
 
 	public User getUser() {
 		return User;
+	}
+	public String getClientIDAsText() {
+		return "Client ID #" + clientID;
 	}
 
 }

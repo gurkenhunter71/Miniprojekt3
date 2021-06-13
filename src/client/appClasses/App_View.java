@@ -54,7 +54,7 @@ public class App_View extends View<App_Model> {
 	
     protected ComboBox<String> comboGroup;
 	
-	protected ToolBar mainViewTB, pwchangeTBtop, mainViewTBbot, pwchangeTBbot, todoTBtop, todoTBbot;
+	protected ToolBar rootTBbot, mainViewTB, pwchangeTBtop, mainViewTBbot, pwchangeTBbot, todoTBtop, todoTBbot;
 	
 	protected Label registerLabel, usernameLabel, pwLabel, loginLabel, usernameLabelLogin, pwLabelLogin, ipLbl, portLabel,
 		portLabelMyView, portLabelNrMyView, portLabelOurView, portLabelNrOurView, lbServerMyView, lbServerIPMyView,
@@ -63,10 +63,10 @@ public class App_View extends View<App_Model> {
 	
 
 	
-	protected Button connectButton, btLogin, registerButton, createUserButton, loginButton, logoutButton, changePWButton, pwchangeSaveButton, backButton,
+	protected Button backRootButton, connectButton, btLogin, registerButton, createUserButton, loginButton, logoutButton, changePWButton, pwchangeSaveButton, backButton,
 		btMyToDo, backButtonToDo, backBtn2, saveBtn, deleteBtn, newToDoButton;
 	
-	protected TextField usernameTF, usernameTFLogin, ipAddressTF, portTF, txtTitle, txtCreator, idTF, newPWTF;
+	protected TextField usernameTFTODO, usernameTF, usernameTFLogin, ipAddressTF, portTF, txtTitle, txtCreator, idTF, newPWTF;
 	
 	protected TextArea txtaDescription;
 	
@@ -110,7 +110,7 @@ public class App_View extends View<App_Model> {
 	           language.setOnAction( event -> {
 					sl.getConfiguration().setLocalOption("Language", locale.getLanguage());
 	                sl.setTranslator(new Translator(locale.getLanguage()));
-	                this.comboGroup.getItems().removeAll(this.comboGroup.getItems());
+	                //this.comboGroup.getItems().removeAll(this.comboGroup.getItems());
 	                updateTexts();
 	            });
 	       }
@@ -202,6 +202,10 @@ public class App_View extends View<App_Model> {
 	
 		this.registerButton = new Button("button.registerButton");
 
+		this.rootTBbot = new ToolBar();
+		this.backRootButton = new Button("button.backRootButton");
+		this.rootTBbot.getItems().add(backRootButton);
+		
 		
 		this.loginGPinner.add(this.loginLabel, 0, 0);
 		this.loginGPinner.add(this.usernameLabelLogin, 0, 1);
@@ -213,6 +217,7 @@ public class App_View extends View<App_Model> {
 		this.loginGPinner.add(this.registerButton, 0, 5, 2, 1);
 		
 		this.loginBP.setCenter(this.loginGPinner);
+		this.loginBP.setBottom(this.rootTBbot);
 		
 		
 		//View Meine ToDo's
@@ -319,6 +324,9 @@ public class App_View extends View<App_Model> {
 		this.idTF = new TextField();
 		this.idTF.setEditable(false);
 		this.idLabel = new Label("label.idLabel");
+		/*this.usernameTFTODO = new TextField();
+		this.usernameTFTODO.setEditable(false);
+		*/
 		
 		this.prioCB = new ChoiceBox <Prio>();
 		this.prioCB.getItems().addAll(Prio.values());
@@ -333,7 +341,7 @@ public class App_View extends View<App_Model> {
 		this.todoGPinner.add(this.dueDP, 1, 3);
 		this.todoGPinner.add(this.idTF, 5, 9);
 		this.todoGPinner.add(this.idLabel, 5, 8);
-	
+		//this.todoGPinner.add(this.usernameTFTODO, 5, 10);
 		
 		
 		
@@ -351,21 +359,10 @@ public class App_View extends View<App_Model> {
 		 
 		//Set Scene
 		sceneRoot = new Scene(root, 700, 550);		
-
-		
-		
-		
 		sceneLogin = new Scene(loginBP, 700, 550);		
-	
-		
-		sceneRegistration = new Scene(registerBP, 700, 550);		
-	
-		
+		sceneRegistration = new Scene(registerBP, 700, 550);	
 		sceneMainView = new Scene(ToDoBP, 700, 550);	
-		
-		
 		sceneChangePW = new Scene(pwchangeBP, 700, 550);		
-		
 		sceneCreateToDo = new Scene(todoBP, 700, 550);		
 		
 		sceneRoot.getStylesheets().add(getClass().getResource("app.css").toExternalForm());
@@ -406,7 +403,11 @@ public class App_View extends View<App_Model> {
 			prioLabel.setText(t.getString("label.prioLabel"));
 			idLabel.setText(t.getString("label.idLabel"));
 			
-
+			pwchangeLabel.setText(t.getString("label.pwchangeLabel"));
+			newPWLabel.setText(t.getString("label.newPWLabel"));
+			
+			
+			
 			// Text Fields
 			//  .setPromptText(t.getString("textField."));
 			
@@ -425,11 +426,15 @@ public class App_View extends View<App_Model> {
 			connectButton.setText(t.getString("button.connectButton"));
 			backButton.setText(t.getString("button.backButton"));
 			
+			
+			backButtonToDo.setText(t.getString("button.backButton"));
+			
 			logoutButton.setText(t.getString("button.logoutButton"));
 			loginButton.setText(t.getString("button.loginButton"));
 			registerButton.setText(t.getString("button.registerButton"));
 			backBtn2.setText(t.getString("button.backBtn2"));
 			saveBtn.setText(t.getString("button.saveBtn"));
+			backRootButton.setText(t.getString("button.backRootButton"));
 			
 
 			//stage.setTitle(t.getString("program.name"));
@@ -446,7 +451,7 @@ public class App_View extends View<App_Model> {
 	}
 
 
-	public void chageViewLogin() {
+	public void changeViewLogin() {
 		stage.setScene(sceneLogin);
 		stage.show();
 		
@@ -459,6 +464,11 @@ public class App_View extends View<App_Model> {
 		
 	}
 
+	public void backToRoot() {
+		stage.setScene(sceneRoot);
+		stage.show();
+		
+	}
 
 	public void pwView() {
 		stage.setScene(sceneChangePW);
@@ -485,6 +495,7 @@ public class App_View extends View<App_Model> {
 		stage.show();
 		
 	}
+	
 
 
 	

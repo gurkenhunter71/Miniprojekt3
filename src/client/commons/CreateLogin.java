@@ -4,6 +4,7 @@ import server.User;
 import server.Client;
 
 
+
 public class CreateLogin extends Message {
 	
 	/**
@@ -25,11 +26,12 @@ public class CreateLogin extends Message {
 		 */
 		@Override
 		public void process(Client client) {
+			
 			boolean result = false;
 			if (username != null && username.length() >= 3) {
 				if (password != null && password.length() >= 3) { // lax password requirements
 					if (User.exists(username) == null) {
-						User newUser = new User(username, password);
+						User newUser = new User(username, password, username);
 						User.add(newUser);
 						result = true;
 					}

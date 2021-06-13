@@ -1,9 +1,9 @@
 .root {
-	-fx-padding: 0px 10px 10px 10px;
+	-fx-padding: 0px 12px 12px 12px;
 	-fx-spacing: 10px;
 }
 
 .hbox {
-	-fx-padding: 10px 0px 10px 0px;
-	-fx-spacing: 10px;
+	-fx-padding: 12px 0px 12px 0px;
+	-fx-spacing: 12px;
 }
